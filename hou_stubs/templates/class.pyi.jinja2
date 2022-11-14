@@ -1,0 +1,8 @@
+class {{ class.name }}:
+
+{% filter indent(4, True) -%}
+    {% for function in class.functions.values() -%}
+        {% include "function.pyi.jinja2" with context -%}
+        {{ "\n" -}}
+    {% endfor -%}
+{% endfilter -%}

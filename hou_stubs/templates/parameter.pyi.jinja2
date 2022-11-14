@@ -1,0 +1,9 @@
+{{ parameter.name -}}
+{# Annotations #}
+{%- if parameter.annotation -%}
+{{ " : " }}{{- format_annotation(parameter.annotation) -}}
+{%- endif -%}
+{# Default Value #}
+{%- if parameter.default -%}
+{{ " = " }} {{ format_annotation(parameter.default) }}
+{%- endif -%}

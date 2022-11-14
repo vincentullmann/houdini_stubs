@@ -1,0 +1,33 @@
+
+################
+# Python
+__pycache__/
+*.py[cod]
+*.swp
+*.*~
+*~
+.mypy_cache
+
+
+################
+# Code Editors
+*.sublime-workspace
+.vscode
+
+
+################
+# Local Dev/Build Files
+static
+node_modules
+venv
+_src
+dist
+.deploy/
+*.webp
+out.py
+
+
+################
+# Config Files
+.env
+tsconfig.tsbuildinfo

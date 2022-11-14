@@ -1,0 +1,23 @@
+"""Stubs for `{{module.name}}`."""
+
+{% for class in module.classes.values() -%}
+    {% include "class.pyi.jinja2" with context -%}
+{% endfor %}
+
+{% for function in module.functions.values() -%}
+    {%- include "function.pyi.jinja2" with context -%}
+{% endfor %}
+
+
+{# {% if member.kind.name == "CLASS" %}
+    {%- with class=member -%}
+        {% include "class.pyi.jinja2" with context -%}
+    {% endwith -%}
+{% elif member.kind.name == "FUNCTION" %}
+    {%- with function=member -%}
+    {% endwith -%}
+{% else %}
+    {{ member.name}} == {{ member.kind.name }}
+{% endif %}
+
+{% endfor %} #}
