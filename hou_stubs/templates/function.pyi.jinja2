@@ -1,14 +1,13 @@
 {{ 'def ' -}}{{ function.name -}}{{ '(' -}}
-{{ '\n' -}}
-{% filter indent(4, True) -%}
-    {% for parameter in function.parameters -%}
-        {%- include "parameter.pyi.jinja2" with context -%}
-        {{- ",\n" -}}
-    {% endfor -%}
-{% endfilter -%}
+{%- for parameter in function.parameters -%}
+    {%- include "parameter.pyi.jinja2" with context -%}
+    {% if not loop.last %}
+        {{- ", " -}}
+    {% endif %}
+{%- endfor -%}
 {{ ")" }}
 {%- if function.returns -%}
-{{ ' -> ' -}}{{ format_annotation(function.returns) -}}
+{{ ' -> ' -}}{{ function.returns -}}{{ '' -}}
 {%- endif -%}
 {{ ': ...' -}}
 

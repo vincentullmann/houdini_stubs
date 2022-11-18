@@ -1,11 +1,14 @@
 """Stubs for `{{module.name}}`."""
 
+from __future__ import annotations
+from typing import Union, Generator, Any
+
 {% for class in module.classes.values() -%}
-    {% include "class.pyi.jinja2" with context -%}
+    {% include "class.pyi.jinja2" with context %}
 {% endfor %}
 
 {% for function in module.functions.values() -%}
-    {%- include "function.pyi.jinja2" with context -%}
+    {% include "function.pyi.jinja2" with context %}
 {% endfor %}
 
 

@@ -24,7 +24,7 @@ _src
 dist
 .deploy/
 *.webp
-out.py
+out.py[i]
 
 
 ################

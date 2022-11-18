@@ -19,7 +19,6 @@ HOU_TO_PY_TYPE = {
 
 
 def format_annotation(annotation: str | Name | Expression | None) -> str | None:
-    print("format_annotation", annotation)
     if not annotation:
         return ""
     annotation = str(annotation)
