@@ -4,7 +4,7 @@ from __future__ import annotations
 import re
 
 # IMPORT THIRD PARTY LIBRARIES
-from griffe.dataclasses import Alias, Class, Decorator, Function, Module, Object, Parameter, Attribute
+from griffe.dataclasses import Alias, Class, Decorator, Function, Module, Object, Parameter, Attribute, Name, Expression
 
 # IMPORT LOCAL LIBRARIES
 from hou_stubs.parser import cpp, docstring
@@ -15,6 +15,8 @@ BLACKLIST = [
     "options",
     "_orig_hou",
     "cvar",
+    "_guDetailHandle",
+    "_geometryHandle",
 ]
 
 
@@ -97,6 +99,13 @@ def split_submodules(root: Module, *submodules: str) -> list[Module]:
 ################################################################################
 # Processors for different object types
 #
+def process_type(name: str | Name | Expression | None) -> str:
+    if not name:
+        return ""
+    name = str(name)
+    name = cpp.parse(name)
+    # parm.annotation = docstring.parse(parm.annotation)
+    return name
 
 
 def process_parameter(func: Function, parm: Parameter) -> None:
@@ -114,9 +123,7 @@ def process_parameter(func: Function, parm: Parameter) -> None:
     if not parm.annotation:
         return
     # parse
-    parm.annotation = str(parm.annotation)
-    parm.annotation = cpp.parse(parm.annotation)
-    # parm.annotation = docstring.parse(parm.annotation)
+    parm.annotation = process_type(parm.annotation)
 
     # convert annotations to absolute paths
     if parm.annotation in func.module.classes:
@@ -142,8 +149,7 @@ def process_function(func: Function):
         else:
             func.returns = ""
     else:
-        func.returns = str(func.returns)
-        func.returns = cpp.parse(func.returns)
+        func.returns = process_type(func.returns)
         # func.returns = docstring.parse(func.returns)
 
     # auto Convert to classmethod
@@ -157,15 +163,14 @@ def process_function(func: Function):
 
 
 def process_class(cls: Class) -> None:
-    cls.name = remove_prefix(cls.name, f"{cls.module.name}.")
-    cls.name = remove_prefix(cls.name, f"hou.{cls.module.name}.")
+    cls.bases = [process_type(base) for base in cls.bases]
 
 
-def process_module(module: Module):
+def process_module(module: Module) -> None:
     pass
 
 
-def fix_top_level_function(attr: Attribute):
+def fix_top_level_function(attr: Attribute) -> None:
     """Replace calls to "__createTopLevelFunc(name)" with actual aliases."""
 
     pattern = r"__createTopLevelFunc\(\'(?P<name>\w+)\'\)"
@@ -174,11 +179,11 @@ def fix_top_level_function(attr: Attribute):
         attr.value = f"houpythonportion.{match.group('name')}"
 
 
-def process_attribute(attr: Attribute):
+def process_attribute(attr: Attribute) -> None:
     fix_top_level_function(attr)
 
 
-def process_object(obj: Object):
+def process_object(obj: Object) -> Object:
 
     obj.members = {k: v for k, v in obj.members.items() if not skip_member(v)}
 

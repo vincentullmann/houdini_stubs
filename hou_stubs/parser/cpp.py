@@ -48,9 +48,11 @@ CPP_TO_PY = {
     "_AgentDefnMap": "dict[AgentDefinition, AgentDefinition]",
     # "HOM_logging_MemorySink": "logging.MemorySink",
     # "HOM_logging_LogEntry": "logging.LogEntry",
-    "_logging_LogEntry": "LogEntry",
+    "_logging_LogEntry": "hou.logging.LogEntry",
+    "_logging_Sink": "hou.logging.Sink",
     "_ik_Joint": "Joint",  # hou.ik.Joint
     "Enum": "enum.Enum",
+    "Node": "hou.Node",
     "HOM_DDSourceAny": "Any",  # hou.ui.getDragSourceData
     # "",
 }

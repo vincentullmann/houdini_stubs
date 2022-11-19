@@ -1,0 +1,6 @@
+{% extends "base/module.pyi.jinja2" %}
+
+{% block imports %}
+{{ super() }}
+from hou import AgentShape, AgentDefinition, AgentClip
+{% endblock %}
