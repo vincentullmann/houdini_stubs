@@ -1,1 +1,13 @@
-NodeBundle = Bundle
+{% extends "base/module.pyi.jinja2" %}
+
+{% block imports %}
+{{ super() }}
+import houpythonportion
+{% endblock %}
+
+{% block members %}
+{{ super() }}
+NodeBundle = Bundle  # alias required for type checking
+{% endblock %}
+
+

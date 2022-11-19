@@ -1,6 +1,5 @@
-"""{{module.docstring.value}}
-"""
 # pyright: reportMissingModuleSource=false
+{% block imports %}
 from __future__ import annotations
 
 import enum
@@ -19,13 +18,10 @@ if TYPE_CHECKING:
     {% endif -%}
     import {{ module.canonical_path }}
 {%  endif %}
+{% endblock %}
 
+{% block members %}
 {% with object = module %}
-    {%- include "_members.pyi.jinja2" with context %}
+    {%- include "base/_members.pyi.jinja2" with context %}
 {% endwith %}
-
-{% set static="static/" + module.canonical_path + ".pyi.jinja2" %}
-{{ "# STATIC PATH:"}} {{ static }}
-{% if file_exists(static) %}
-{% include static %}
-{% endif %}
+{% endblock %}

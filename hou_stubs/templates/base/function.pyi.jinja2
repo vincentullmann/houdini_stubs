@@ -3,7 +3,7 @@
 {% endfor %}
 {{ 'def ' -}}{{ function.name -}}{{ '(' -}}
 {%- for parameter in function.parameters -%}
-    {%- include "parameter.pyi.jinja2" with context -%}
+    {%- include "base/parameter.pyi.jinja2" with context -%}
     {% if not loop.last %}
         {{- ", " -}}
     {% endif %}

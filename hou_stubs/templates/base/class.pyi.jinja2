@@ -10,7 +10,7 @@
 {%- else %}
     {% filter indent(width=4) %}
         {%- with object = class %}
-            {%- include "_members.pyi.jinja2" with context %}
+            {%- include "base/_members.pyi.jinja2" with context %}
         {%- endwith %}
     {% endfilter %}
 {% endif %}

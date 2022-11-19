@@ -4,7 +4,7 @@ from __future__ import annotations
 import re
 
 # IMPORT THIRD PARTY LIBRARIES
-from griffe.dataclasses import Alias, Class, Decorator, Function, Module, Object, Parameter
+from griffe.dataclasses import Alias, Class, Decorator, Function, Module, Object, Parameter, Attribute
 
 # IMPORT LOCAL LIBRARIES
 from hou_stubs.parser import cpp, docstring
@@ -150,6 +150,18 @@ def process_module(module: Module):
     pass
 
 
+def fix_top_level_function(attr: Attribute):
+    """Replace calls to "__createTopLevelFunc(name)" with actual aliases."""
+
+    match = re.match(r"__createTopLevelFunc\(\'(?P<name>\w+)\'\)", attr.value)
+    if match:
+        attr.value = f"houpythonportion.{match.group('name')}"
+
+
+def process_attribute(attr: Attribute):
+    fix_top_level_function(attr)
+
+
 def process_object(obj: Object):
 
     obj.members = {k: v for k, v in obj.members.items() if not skip_member(v)}
@@ -162,6 +174,8 @@ def process_object(obj: Object):
         process_class(obj)
     if isinstance(obj, Function):
         process_function(obj)
+    if isinstance(obj, Attribute):
+        process_attribute(obj)
 
     for member in obj.members.values():
         if isinstance(member, Object):
