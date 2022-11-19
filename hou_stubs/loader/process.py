@@ -99,10 +99,20 @@ def split_submodules(root: Module, *submodules: str) -> list[Module]:
 #
 
 
-def process_parameter(func: Function, parm: Parameter):
+def process_parameter(func: Function, parm: Parameter) -> None:
+
+    # Convert "args=()" and "kwargs={}" to "*args: Any" and "**kwargs: Any"
+    if parm.name == "args" and parm.default == "()":
+        parm.name = "*args"
+        parm.default = ""
+        parm.annotation = "Any"
+    if parm.name == "kwargs" and parm.default == "{}":
+        parm.name = "**kwargs"
+        parm.default = ""
+        parm.annotation = "Any"
+
     if not parm.annotation:
         return
-
     # parse
     parm.annotation = str(parm.annotation)
     parm.annotation = cpp.parse(parm.annotation)

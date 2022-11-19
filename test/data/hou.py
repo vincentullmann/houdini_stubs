@@ -50,6 +50,9 @@ def global_method(arg1, arg2: str = "Hey") -> list[int]:
 def implicit_optional(name: str = None): ...
 
 
+def args_and_kwargs(self, args=(), kwargs={}) -> None: ...
+
+
 class EmptyClass(type, SomeClass):
     """a class without any members."""
 
@@ -61,7 +64,7 @@ class logging:
 
 
 class _logging_sub:
-    def stuff(self, name: str): ...
+    def stuff(self, name: str, stuff: EmptyClass): ...
 
 
 def readInput(self, *args, **kwargs) -> "std::pair< int,std::string >":
