@@ -23,10 +23,11 @@ CPP_TO_PY = {
     # float and int
     "double": "float",
     "Double": "float",
+    "Float": "float",
     "size_t": "int",
     "long": "int",
     "short": "int",
-    "int": "int",
+    "Int": "int",
     "int64": "int",
     "Int64": "int",
     "std::vector": "list",
@@ -44,9 +45,13 @@ CPP_TO_PY = {
     "HOM_BinaryString": "dict",
     "UT_Tuple": "tuple",
     "EnumTuple": "tuple[EnumValue]",
+    "_AgentDefnMap": "dict[AgentDefinition, AgentDefinition]",
     # "HOM_logging_MemorySink": "logging.MemorySink",
     # "HOM_logging_LogEntry": "logging.LogEntry",
-    # "_logging_LogEntry": "logging.LogEntry",
+    "_logging_LogEntry": "LogEntry",
+    "_ik_Joint": "Joint",  # hou.ik.Joint
+    "Enum": "enum.Enum",
+    "HOM_DDSourceAny": "Any",  # hou.ui.getDragSourceData
     # "",
 }
 
