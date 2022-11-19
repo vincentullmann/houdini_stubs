@@ -84,16 +84,30 @@ def _extract_module(root: Module, name: str) -> Module | None:
     return module
 
 
-def split_submodules(root: Module, *submodules: str) -> list[Module]:
+SUBMODULE_PATTERN = """\
+def __{name}() -> "HOM_{name} &":
+    return _hou.__{name}()"""
+"""The exact pattern we expect submodule-creator functions to look like."""
+
+
+def is_submodule_func(func: Function) -> str:
+    """Check if a function is a submodule creator.
+
+    Returns the module name if it is a submodule. Otherwise returns an empty string
+    """
+    if not func.name.startswith("__"):
+        return ""
+
+    name = func.name[2:]
+    pattern = SUBMODULE_PATTERN.format(name=name)
+    return name if func.source == pattern else ""
+
+
+def split_submodules(root: Module, *submodules: str):
     """Split some classes into their own modules."""
-
-    modules: list[Module] = [root]
-    for name in submodules:
-        module = _extract_module(root, name)
-        if module:
-            modules.append(module)
-
-    return modules
+    for func in root.functions.values():
+        if name := is_submodule_func(func):
+            _extract_module(root, name)
 
 
 ################################################################################
@@ -181,6 +195,9 @@ def fix_top_level_function(attr: Attribute) -> None:
 
 def process_attribute(attr: Attribute) -> None:
     fix_top_level_function(attr)
+
+
+################################################################################
 
 
 def process_object(obj: Object) -> Object:

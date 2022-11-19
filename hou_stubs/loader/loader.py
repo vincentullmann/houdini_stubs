@@ -14,10 +14,6 @@ def load_module(name: str, search_paths: list[str] = [], submodules: list[str] =
         search_paths: The paths to search for the module.
     """
     root = griffe.load(module=name, search_paths=search_paths)
-
+    process.split_submodules(root)
     process.process_object(root)
-
-    if submodules:
-        process.split_submodules(root, *submodules)
-
     return root

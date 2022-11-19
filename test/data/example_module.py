@@ -72,3 +72,12 @@ def readInput(self, *args, **kwargs) -> "std::pair< int,std::string >":
 
 
 expandString = __createTopLevelFunc("expandString")
+
+
+# test for submodule creator functions
+
+class mySubModule:
+    def submodule_func(): ...
+
+def __mySubModule() -> "HOM_mySubModule &":
+    return _hou.__mySubModule()
