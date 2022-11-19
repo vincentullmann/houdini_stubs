@@ -1,4 +1,3 @@
-import re
 from hou_stubs.parser import base
 
 
@@ -22,24 +21,8 @@ def or_to_union(text: str):
     if len(parts) == 1:
         return parts[0]
 
-    parts = ", ".join(parts)
-    return f"Union[{parts}]"
-
-
-def multi_or_to_union(match: re.Match):
-    """Format a match of multiple items into a "Union"-Annotation.
-
-    Example:
-        >>> multi_or_to_union("a, b, c or d")
-        Union[a, b, c, d]
-    """
-    text = match.group(0)
-    print("multi_or_to_union 1", text)
-    text = text.replace(", or ", " or ")  # for cases like "a, b, or c"  (note the comma after b)
-    print("multi_or_to_union 2", text)
-    text = text.replace(", ", " or ")
-    return ""
-    return or_to_union(text)
+    text = ", ".join(parts)
+    return f"Union[{text}]"
 
 
 class DocstringParser(base.Parser):
@@ -56,8 +39,7 @@ class DocstringParser(base.Parser):
         "HOM_AdvancedDrawable::Params const &": "Any",
         "dict of [Hom:hou.parmCondType] enum value to string": "dict[hou.parmCondType, str]",
         "`": "",  # remove some random backticks scattered around
-        "tuples": "tuple",
-        "(hou.ObjNode, str)": "tuple[hou.ObjNode, str]",  # hipFile.importFBX
+        "_EnumTuple": "tuple[EnumValue]",
     }
 
     patterns: base.PATTERNS_TYPE = [
@@ -65,19 +47,14 @@ class DocstringParser(base.Parser):
         (r"dict of (.+) to (.+)", r"dict[\1, \2]"),  # "dict of str to int" --> "dict[str, int]"
         (r"(.+?) of (.+)", r"\1[\2]"),  # "tuple of hou.Point" --> "tuple[hou.Point]"
         (r"(.+) enum value", r"\1"),  # "Foo enum value" -> "Foo",
-        # (r"(?:(\w+),\s*)+or (\w+)", multi_or_to_union),
-        # (r"(?:(\w+),\s*)+or (\w+)", or_to_union),
-        # (r"\`$", ""),
         (r"\[Hom\:(hou\.\w+)\]", r"\1"),  # [Hom:hou.Selection] -> hou.Selection
         (r"(.+) subclass", r"\1"),
+        (r"_(.+)Tuple", r"tuple[\1]"),  # "_FooTuple" -> "tuple[Foo]"
     ]
 
     formatters = [
         or_to_union,
     ]
-
-    def pre(self, text: str) -> str:
-        return super().pre(text)
 
 
 parser = DocstringParser()

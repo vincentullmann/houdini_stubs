@@ -58,7 +58,7 @@ def test_parse_examples():
     assert cpp.parse(text) == "dict[str, Any]"
 
     text = "std::vector<HOM_ElemPtr<HOM_Vertex>,std::allocator<HOM_ElemPtr<HOM_Vertex>>>"
-    assert cpp.parse(text) == "list[Vertex]"
+    assert cpp.parse(text) == "list[hou.Vertex]"
 
     text = "std::map< HOM_AgentDefinition *,HOM_AgentDefinition * >::size_type"
     assert cpp.parse(text) == "int"
@@ -66,26 +66,20 @@ def test_parse_examples():
 
 def test_parse_example1():
     #################
-    assert cpp.parse("std::vector< HOM_EnumValue *,std::allocator< HOM_EnumValue * >>") == "list[EnumValue]"
+    assert cpp.parse("std::vector< HOM_EnumValue *,std::allocator< HOM_EnumValue * >>") == "list[hou.EnumValue]", 1
+    assert cpp.parse("std::pair< list[hou.EnumValue],InterpreterObject >") == "tuple[list[hou.EnumValue], Any]", "Step2"
 
-    text = "std::vector< std::pair< list[EnumValue],InterpreterObject >,std::allocator< std::pair< std::vector< HOM_EnumValue *,std::allocator< HOM_EnumValue * > >,InterpreterObject > > >"
-    assert cpp.parse("std::vector< HOM_EnumValue *,std::allocator< HOM_EnumValue * >>") == "list[EnumValue]"
-    assert cpp.parse("std::pair< list[EnumValue],InterpreterObject >") == "tuple[list[EnumValue], Any]"
-
-    assert (
-        cpp.parse(
-            "std::vector<Foo,std::allocator< std::pair< std::vector< HOM_EnumValue *,std::allocator< HOM_EnumValue * > >,InterpreterObject > > >"
-        )
-        == "list[Foo]"
+    text = (
+        "std::vector<Foo,std::allocator< std::pair< std::vector< HOM_EnumValue *,"
+        "std::allocator< HOM_EnumValue * > >,InterpreterObject > > >"
     )
+    assert cpp.parse(text) == "list[Foo]", "Step 3"
 
-    assert (
-        cpp.parse(
-            "std::vector<tuple[list[EnumValue], Any],std::allocator< std::pair< std::vector< HOM_EnumValue *,std::allocator< HOM_EnumValue * > >,InterpreterObject > > >"
-        )
-        == "list[tuple[list[EnumValue]]"
+    text = (
+        "std::vector<tuple[list[hou.EnumValue], Any],std::allocator< std::pair< std::vector< HOM_EnumValue *,"
+        "std::allocator< HOM_EnumValue * > >,InterpreterObject > > >"
     )
-    text = "std::vector<tuple[list[EnumValue], Any],std::allocator< std::pair< std::vector< HOM_EnumValue *,std::allocator< HOM_EnumValue * > >,InterpreterObject > > >"
+    assert cpp.parse(text) == "list[tuple[list[hou.EnumValue]]", "Step 4"
 
     # full
     text = (
@@ -93,7 +87,7 @@ def test_parse_example1():
         "std::allocator<HOM_EnumValue * >>,InterpreterObject >,"
         "std::allocator< std::pair< std::vector< HOM_EnumValue *,std::allocator< HOM_EnumValue * > >,InterpreterObject > > >"
     )
-    assert cpp.parse(text) == "list[tuple[list[EnumValue], Any]]"
+    assert cpp.parse(text) == "list[tuple[list[hou.EnumValue], Any]]", "Step 5"
 
 
 def test_selectOrientedPositions():
@@ -101,14 +95,20 @@ def test_selectOrientedPositions():
         "std::vector< std::pair< HOM_ElemPtr< HOM_Vector3 >,HOM_ElemPtr< HOM_Matrix3 > >,std::allocator"
         "< std::pair< HOM_ElemPtr< HOM_Vector3 >,HOM_ElemPtr< HOM_Matrix3 > > > >"
     )
-    assert cpp.parse(text) == "list[tuple[Vector3, Matrix3]]"
+    assert cpp.parse(text) == "list[tuple[hou.Vector3, hou.Matrix3]]"
+
+
+def test_example3():
+    text = "std::vector< HOM_ParmTuple *,std::allocator< HOM_ParmTuple * > > const &"
+    assert cpp.parse(text) == "list[hou.ParmTuple]"
 
 
 ################################################################################
 
 if __name__ == "__main__":
-    import pytest
     import sys
+
+    import pytest
 
     # test_parse()
     pytest.main(sys.argv)

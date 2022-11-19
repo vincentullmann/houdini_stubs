@@ -1,3 +1,6 @@
+{% for decorator in function.decorators %}
+{{ "@" }}{{ decorator.value }}
+{% endfor %}
 {{ 'def ' -}}{{ function.name -}}{{ '(' -}}
 {%- for parameter in function.parameters -%}
     {%- include "parameter.pyi.jinja2" with context -%}

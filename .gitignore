@@ -25,6 +25,7 @@ dist
 .deploy/
 *.webp
 out.py[i]
+typings/*
 
 
 ################

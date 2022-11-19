@@ -4,6 +4,9 @@ from hou_stubs.parser import docstring
 def test_tuple():
     assert docstring.parse("tuple of Foo") == "tuple[Foo]"
 
+    assert docstring.parse("_FooTuple") == "tuple[Foo]"
+    assert docstring.parse("_Int64Tuple") == "tuple[int]"
+
 
 def test_or():
     assert docstring.parse("str or int") == "Union[str, int]"
@@ -42,7 +45,7 @@ def test_random_bits():
     assert docstring.parse("tuple of [Hom:hou.Selection]`") == "tuple[hou.Selection]"
     assert docstring.parse("Qt.QtWidgets.QWidget subclass") == "Qt.QtWidgets.QWidget"
 
-    assert docstring.parse("(tuple of hou.RopNode)") == "tuple[hou.RopNode]"
+    assert docstring.parse("(tuple of hou.RopNode)") == "tuple[tuple[hou.RopNode]]"
 
 
 if __name__ == "__main__":
