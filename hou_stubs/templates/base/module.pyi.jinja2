@@ -11,10 +11,9 @@ import {{ submodule.canonical_path }}
 
 {% if module.name != "__init__" %}
 if TYPE_CHECKING:
-    {% if module.parent -%}
     # fix some namespace issues for submodules
+    {% if module.parent -%}
     import {{ module.parent.canonical_path }}
-    from  {{ module.parent.canonical_path }} import *
     {% endif -%}
     import {{ module.canonical_path }}
 {%  endif %}

@@ -13,6 +13,8 @@ BLACKLIST = [
     "SwigPyIterator",
     "thisown",
     "options",
+    "_orig_hou",
+    "cvar",
 ]
 
 
@@ -97,25 +99,28 @@ def split_submodules(root: Module, *submodules: str) -> list[Module]:
 #
 
 
-def process_parameter(parm: Parameter):
-    if parm.annotation:
-        parm.annotation = str(parm.annotation)
-        parm.annotation = cpp.parse(parm.annotation)
-        # parm.annotation = docstring.parse(parm.annotation)
+def process_parameter(func: Function, parm: Parameter):
+    if not parm.annotation:
+        return
 
-        if parm.default == "None":
-            parm.annotation = f"Optional[{parm.annotation}]"
+    # parse
+    parm.annotation = str(parm.annotation)
+    parm.annotation = cpp.parse(parm.annotation)
+    # parm.annotation = docstring.parse(parm.annotation)
 
-    pass
+    # convert annotations to absolute paths
+    if parm.annotation in func.module.classes:
+        parm.annotation = func.module.classes[parm.annotation].canonical_path
+
+    # convert implicit_optional
+    if parm.default == "None":
+        parm.annotation = f"Optional[{parm.annotation}]"
 
 
 def process_function(func: Function):
 
-    # if func.name not in ["averageMinDistance", "globPoints", "orientedPrimBoundingBox"]:
-    #     return
-
     for parameter in func.parameters:
-        process_parameter(parameter)
+        process_parameter(func, parameter)
 
     if False:  # func.docstring:
         text = func.docstring.value or ""
@@ -153,7 +158,8 @@ def process_module(module: Module):
 def fix_top_level_function(attr: Attribute):
     """Replace calls to "__createTopLevelFunc(name)" with actual aliases."""
 
-    match = re.match(r"__createTopLevelFunc\(\'(?P<name>\w+)\'\)", attr.value)
+    pattern = r"__createTopLevelFunc\(\'(?P<name>\w+)\'\)"
+    match = re.match(pattern, str(attr.value))
     if match:
         attr.value = f"houpythonportion.{match.group('name')}"
 
