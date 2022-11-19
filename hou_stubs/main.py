@@ -9,6 +9,7 @@ Usage:
 # IMPORT STANDARD LIBRARIES
 import argparse
 import os
+import shutil
 
 # IMPORT LOCAL LIBRARIES
 from hou_stubs import render
@@ -56,6 +57,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("path")
     parser.add_argument("-o", "--out", help="Output directory", default="./typings")
+    parser.add_argument("--clean", help="clean the output directory", action="store_true")
     return parser.parse_args()
 
 
@@ -72,6 +74,10 @@ def main() -> None:
         search_paths=search_paths,
         submodules=SUBMODULES,
     )
+
+    if args.clean:
+        print(f"deleting {args.out}!")
+        shutil.rmtree(args.out)
 
     render.render_module(module, args.out)
 
