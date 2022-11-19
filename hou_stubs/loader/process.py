@@ -43,6 +43,11 @@ def skip_member(obj: Object | Alias) -> bool:
     return False
 
 
+################################################################################
+# Logic to split "fake modules" into proper sub-modules
+#
+
+
 def _extract_module(root: Module, name: str) -> Module | None:
     # modules.append(module)
     # module.kind = Kind.MODULE
@@ -51,10 +56,13 @@ def _extract_module(root: Module, name: str) -> Module | None:
     except KeyError:
         return None
 
-    module = Module(name=name)
-    module.parent = root
+    module = Module(name=name, parent=root)
     module.members = source.members
     root.members[name] = module
+
+    # update the parent ref
+    for member in module.members.values():
+        member.parent = module
 
     # remove the "self" paramater from all methods
     # as they are now regular functions
@@ -69,9 +77,7 @@ def _extract_module(root: Module, name: str) -> Module | None:
     for member_name in names:
         member = root.members.pop(member_name)
         member.name = member_name[len(prefix) :]
-        member.name = member_name[1:].replace("_", ".")
         member.parent = module
-        print("member.name", member.name)
         module.members[member.name] = member
 
     return module
@@ -85,17 +91,20 @@ def split_submodules(root: Module, *submodules: str) -> list[Module]:
         module = _extract_module(root, name)
         if module:
             modules.append(module)
-        # if module:
-        #     root[name] = module
 
     return modules
+
+
+################################################################################
+# Processors for different object types
+#
 
 
 def process_parameter(parm: Parameter):
     if parm.annotation:
         parm.annotation = str(parm.annotation)
         parm.annotation = cpp.parse(parm.annotation)
-        parm.annotation = docstring.parse(parm.annotation)
+        # parm.annotation = docstring.parse(parm.annotation)
 
         if parm.default == "None":
             parm.annotation = f"Optional[{parm.annotation}]"
@@ -123,7 +132,7 @@ def process_function(func: Function):
     else:
         func.returns = str(func.returns)
         func.returns = cpp.parse(func.returns)
-        func.returns = docstring.parse(func.returns)
+        # func.returns = docstring.parse(func.returns)
 
     # auto Convert to classmethod
     is_method = func.parent and func.parent.is_class

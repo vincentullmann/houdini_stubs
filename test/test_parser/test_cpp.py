@@ -1,3 +1,7 @@
+import sys
+
+import pytest
+
 from hou_stubs.parser import cpp
 
 
@@ -6,14 +10,6 @@ def test_parse_fixed_type():
     assert cpp.parse("void") == "None"
     assert cpp.parse("std::string") == "str"
     assert cpp.parse("double") == "float"
-
-
-################################################################################
-# Python Docstrings
-
-
-################################################################################
-# C++ std types
 
 
 def test_parse():
@@ -28,6 +24,11 @@ def test_parse_vector():
     assert cpp.parse("std::vector<Foo>") == "list[Foo]"
     assert cpp.parse("std::vector < Bar > ") == "list[Bar]"
     assert cpp.parse("std::vector<std::vector<Foo>>") == "list[list[Foo]]"
+
+
+def test_tuple():
+    assert cpp.parse("_FooTuple") == "tuple[Foo]"
+    assert cpp.parse("_Int64Tuple") == "tuple[int]"
 
 
 def test_parse_map():
@@ -106,9 +107,4 @@ def test_example3():
 ################################################################################
 
 if __name__ == "__main__":
-    import sys
-
-    import pytest
-
-    # test_parse()
     pytest.main(sys.argv)

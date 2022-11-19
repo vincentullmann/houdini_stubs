@@ -1,17 +1,19 @@
 """Parse Annotation/Docstrings."""
+from __future__ import annotations
 
-from dataclasses import dataclass, field
+# IMPORT STANDARD LIBRARIES
 import re
-from typing import ClassVar, Optional
+from dataclasses import dataclass, field
 
+# IMPORT LOCAL LIBRARIES
 from hou_stubs.parser import base
-
 
 ################################################################################
 
 
 CPP_TO_PY = {
     "void": "None",
+    "Bool": "bool",
     # str types
     "std::string": "str",
     "String": "str",
@@ -23,6 +25,8 @@ CPP_TO_PY = {
     "Double": "float",
     "size_t": "int",
     "long": "int",
+    "short": "int",
+    "int": "int",
     "int64": "int",
     "Int64": "int",
     "std::vector": "list",
@@ -30,10 +34,19 @@ CPP_TO_PY = {
     "std::map": "dict",
     # Objects
     "PyObject": "Any",
+    "PY_OpaqueObject": "Any",
     "hboost::any": "Any",
     "swig::SwigPyIterator": "list[Any]",
     "InterpreterObject": "Any",
+    "IterableList": "list",
+    "HOM_IterableList": "list",
     "HOM_AdvancedDrawable::Params": "dict",
+    "HOM_BinaryString": "dict",
+    "UT_Tuple": "tuple",
+    "EnumTuple": "tuple[EnumValue]",
+    # "HOM_logging_MemorySink": "logging.MemorySink",
+    # "HOM_logging_LogEntry": "logging.LogEntry",
+    # "_logging_LogEntry": "logging.LogEntry",
     # "",
 }
 
@@ -44,14 +57,29 @@ class Node:
     name: str
     suffix: str = ""
     children: list["Node"] = field(default_factory=list)
-    parent: "Node" = None
+    parent: "Node" | None = None
 
     def to_python(self) -> str:
 
-        name = CPP_TO_PY.get(self.name) or self.name
+        name = self.name
+
+        # "_FooTuple" --> "tuple[Foo]"
+        match = re.match(r"^_(.+)Tuple$", name)
+        if match:
+            name = "tuple"
+            inner_type = match.group(1)
+            self.children = [Node(name=inner_type)]
+
+        name = CPP_TO_PY.get(name, name)
+
+        # "HOM_logging_LogEntry" --> "hou.logging.LogEntry"
+        if name.startswith("HOM_"):
+            name = name[4:]
+            name = name.replace("_", ".")
+            name = f"hou.{name}"
 
         # remove wrappers
-        if name in ("std::allocator", "std::less", "ElemPtr"):
+        if name in ("std::allocator", "std::less", "hou.ElemPtr"):
             return self.children[0].to_python()
 
         if self.suffix in ("size_type",):
@@ -64,9 +92,7 @@ class Node:
             self.children = self.children[0:2]
 
         if self.children:
-            children = [child.to_python() for child in self.children]
-            children = ", ".join(children)
-            # children = f"({children})"
+            children = ", ".join([child.to_python() for child in self.children])
             name = f"{name}[{children}]"
 
         return name
@@ -83,7 +109,10 @@ def tokenize(string: str) -> Node:
     # curr: Optional[Node] = None
     # nodes: list[Node] = []
     # depth = 0
-    node = Node(name="root")
+    root = Node(name="root")
+
+    # initial values
+    node = root
     parent = node
 
     parts: list[str] = re.findall(rf"{OPEN}|{CLOSE}|[^{OPEN}{CLOSE},]+", string)
@@ -104,17 +133,12 @@ def tokenize(string: str) -> Node:
         elif part == CLOSE:
             # closing a block
             node = parent
-            parent = node.parent
+            parent = node.parent or root
         else:
             node = Node(name=part, parent=parent)
             if parent:
                 parent.children.append(node)
     return node
-
-
-def remove_pointer(text):
-    """Remove pointer from text."""
-    return re.sub(r"^\s*Pointer\s+<([^<>]+)>", r"\1", text)
 
 
 class CppParser(base.Parser):
@@ -125,26 +149,6 @@ class CppParser(base.Parser):
         "HOM_ViewerDragger::DragValueMap": "dict",
     }
 
-    patterns: base.PATTERNS_TYPE = [
-        # (r"\s*<\s*", "<"),
-        # (r"\s*>\s*", ">"),
-        # Pointer/Const
-        (r"(.+\S)\s*(\*|\&|const)+", r"\1"),
-        # C++ std
-        (r"std::\w+<([^<>]+)>::size_type", r"int"),
-        (r"std::\w+<([^<>]+)>::iterator", r"int"),
-        (r"std::less<([^<>]+)>", r"\1"),  # "std::less<Foo>" == "Foo"
-        (r"std::allocator<([^<>]+)>", r"\1"),  # "std::allocator<Foo>" == "Foo"
-        # # (r"std::vector<([^<>]+)>", r"list[\1]"),  # "std::vector<Foo>" == "list[Foo]"
-        (r"std::vector<([^<>,]+)(,[^<>]+)*>", r"list[\1]"),  # "std::vector<Foo,X,Y,Z>" == "list[Foo]"
-        (r"std::pair<([^<>]+)\s*,\s*([^>]+)>", r"tuple[\1, \2]"),  # "std::pair<Foo, Bar>" == "tuple[Foo, Bar]"
-        (r"std::map<([^<>]+?)\s*,\s*([^<>,]+)[^>]*>", r"dict[\1, \2]"),  # "std::map<Foo, Bar>" == "dict[Foo, Bar]"
-        # # HOM
-        (r"HOM_ElemPtr<([^<>]+)>", r"\1"),  # "HOM_ElemPtr<Foo>" -> "Foo"
-        (r"HOM_IterableList<([^<>]+)>", r"list[\1]"),  # "HOM_IterableList<Foo>" -> "list[Foo"
-        (r"HOM_([^<>]+)", r"\1"),
-    ]
-
     def pre(self, text) -> str:
         text = super().pre(text)
         # text = re.sub(r"\s*([<>])\s*", r"\1", text)  # remove spaces around "<" and ">"
@@ -152,7 +156,6 @@ class CppParser(base.Parser):
         text = text.replace(" *", "")
         text = text.replace(" &", "")
         text = text.replace(" const", "")
-        text = text.replace("HOM_", "")  # "HOM_Vertex" -> "Vertex"
         return text
 
     def main(self, text):
@@ -163,10 +166,3 @@ class CppParser(base.Parser):
 parser = CppParser()
 
 parse = parser.parse
-
-
-# node = parse_string("foo<bar, b<b1, <b2>>>")
-# print("##################")
-# print("R:", node)
-# # node.print_tree()
-# print(format_node(node))

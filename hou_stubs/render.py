@@ -9,7 +9,7 @@ from typing import Any
 # IMPORT THIRD PARTY LIBRARIES
 import black
 import jinja2
-from griffe.dataclasses import Object
+from griffe.dataclasses import Module
 
 TEMPLATES_PATH = Path(__file__).parent / "templates"
 
@@ -45,18 +45,24 @@ def blackify(content: str) -> str:
         return content
 
 
-def render_obj(obj: Object, path: str, template: str = "module.pyi.jinja2") -> None:
-
-    content = render_template(template, module=obj)
-    content = blackify(content)
+def render_module(module: Module, path: str) -> None:
 
     # build the output filepath
-    filepath = obj.canonical_path.replace(".", "/")
-    if obj.modules:
-        filepath = f"{filepath}/__init__"
-    filepath = f"{path}/{filepath}.pyi"
+    filename = module.canonical_path.replace(".", "/")
+    filename = os.path.join(path, filename)
+
+    if module.modules:
+        filename = f"{filename}/__init__.pyi"  # its a package
+        for submodule in module.modules.values():
+            render_module(submodule, path)
+    else:
+        filename = f"{filename}.pyi"  # its a regular module
+
+    # Render the template
+    content = render_template("module.pyi.jinja2", module=module)
+    content = blackify(content)
 
     # write
-    os.makedirs(os.path.dirname(filepath), exist_ok=True)
-    with open(filepath, "w") as f:
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    with open(filename, "w") as f:
         f.write(content)

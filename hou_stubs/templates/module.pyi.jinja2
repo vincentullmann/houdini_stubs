@@ -6,7 +6,10 @@ from typing import Union, Generator, Any, Optional
 {% if module.name != "__init__" %}
 import typing
 if typing.TYPE_CHECKING:
-    import hou
+    {% if module.parent -%}
+    import {{ module.parent.canonical_path }}
+    {% endif -%}
+    import {{ module.canonical_path }}
 {%  endif %}
 
 {% for class in module.classes.values() -%}

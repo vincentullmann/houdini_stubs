@@ -6,7 +6,7 @@ from griffe.dataclasses import Module
 from hou_stubs.loader import process
 
 
-def load_module(name: str, search_paths: list[str] = [], submodules: list[str] = []) -> list[Module]:
+def load_module(name: str, search_paths: list[str] = [], submodules: list[str] = []) -> Module:
     """Load the given module.
 
     Args:
@@ -15,12 +15,9 @@ def load_module(name: str, search_paths: list[str] = [], submodules: list[str] =
     """
     root = griffe.load(module=name, search_paths=search_paths)
 
+    process.process_object(root)
+
     if submodules:
-        modules = process.split_submodules(root, *submodules)
-    else:
-        modules = [root]
+        process.split_submodules(root, *submodules)
 
-    for module in modules:
-        module = process.process_object(module)
-
-    return modules
+    return root
