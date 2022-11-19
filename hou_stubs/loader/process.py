@@ -4,7 +4,8 @@ from __future__ import annotations
 import re
 
 # IMPORT THIRD PARTY LIBRARIES
-from griffe.dataclasses import Alias, Class, Decorator, Function, Module, Object, Parameter, Attribute, Name, Expression
+from griffe.dataclasses import Alias, Attribute, Class, Decorator, Function, Module, Object, Parameter
+from griffe.expressions import Expression, Name
 
 # IMPORT LOCAL LIBRARIES
 from hou_stubs.parser import cpp, docstring
@@ -31,7 +32,7 @@ def skip_member(obj: Object | Alias) -> bool:
     name = obj.name
 
     # magic methods
-    if name.startswith("__"):
+    if name.startswith("__") and name.endswith("__"):
         return True
 
     # all the "_FooTuple" Classes
@@ -103,11 +104,12 @@ def is_submodule_func(func: Function) -> str:
     return name if func.source == pattern else ""
 
 
-def split_submodules(root: Module, *submodules: str):
+def split_submodules(root: Module):
     """Split some classes into their own modules."""
     for func in root.functions.values():
         if name := is_submodule_func(func):
             _extract_module(root, name)
+            root.members.pop(func.name)
 
 
 ################################################################################

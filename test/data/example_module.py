@@ -1,4 +1,5 @@
 # fmt: off
+# type: ignore
 
 class SomeClass:
     """This is some Class.
@@ -17,7 +18,7 @@ class SomeClass:
 
     some_var: int = 4
 
-    def test_less(self,) -> "std::less< foo >":
+    def test_less(self) -> "std::less< foo >":
         ...
 
     def setData(self, data: "std::map< std::string,hboost::any,std::less< std::string >,std::allocator< std::pair< std::string const,hboost::any > > > const &") -> "void":
