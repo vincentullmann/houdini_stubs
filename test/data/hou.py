@@ -6,8 +6,6 @@ class SomeClass:
     More info about the class.
     """
 
-    some_var: int = 4
-
     def __init__(self, name: str) -> "void":
         pass
 
@@ -16,6 +14,8 @@ class SomeClass:
 
         More info about the method.
         """
+
+    some_var: int = 4
 
     def test_less(self,) -> "std::less< foo >":
         ...
@@ -35,6 +35,12 @@ class SomeClass:
     def aut_decorated_static(name: str): ...
 
 
+    class NestedClass:
+
+        def nested_class_method(self): ...
+
+
+SOME_CONSTANT: int = 5
 
 def global_method(arg1, arg2: str = "Hey") -> list[int]:
     """This is my Global Method."""
@@ -44,7 +50,7 @@ def global_method(arg1, arg2: str = "Hey") -> list[int]:
 def implicit_optional(name: str = None): ...
 
 
-class EmptyClass(type):
+class EmptyClass(type, SomeClass):
     """a class without any members."""
 
 class logging:
@@ -60,3 +66,6 @@ class _logging_sub:
 
 def readInput(self, *args, **kwargs) -> "std::pair< int,std::string >":
     ...
+
+
+expandString = __createTopLevelFunc("expandString")

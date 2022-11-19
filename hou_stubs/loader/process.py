@@ -27,11 +27,8 @@ def skip_member(obj: Object | Alias) -> bool:
     name = obj.name
 
     # magic methods
-    if name.startswith("__") and name.endswith("__"):
+    if name.startswith("__"):
         return True
-
-    # if name.startswith("_"):
-    #     return True
 
     # all the "_FooTuple" Classes
     if re.match(r"_(.+)Tuple", name):
