@@ -4,10 +4,26 @@ from hou_stubs.loader import loader
 
 ################################################################################
 
+# Handritten List of Modules which are defined as classes in the hou.py
+# those will be converted into proper modules later
 SUBMODULES = [
     "hipFile",
     "logging",
     "ui",
+    "hda",
+    "ik",
+    "crowds",
+    "dop",
+    "audio",
+    "hmath",
+    "hotkeys",
+    "session",
+    "playbar",
+    "styles",
+    "lop",
+    "qt",
+    "undos",
+    "text",
 ]
 
 
