@@ -1,0 +1,6 @@
+{{ attribute.name -}}
+{% if attribute.annotation -%}
+    {{ ": " }}{{- attribute.annotation -}}
+{%  endif -%}
+{{ " = " -}}
+{{ attribute.value }}

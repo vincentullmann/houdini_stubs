@@ -17,7 +17,6 @@ __pycache__/
 
 ################
 # Local Dev/Build Files
-static
 node_modules
 venv
 _src

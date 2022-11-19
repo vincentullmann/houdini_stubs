@@ -1,14 +1,16 @@
-class {{ class.name }}
+{{ "class " }}{{ class.name }}
 {%- for base in class.bases -%}
 {% if loop.first %}{{ "(" }}{% endif %}
-{{ base }}
+{{- base -}}
 {% if loop.last %}{{ ")" }}{% else %}{{ ", " }}{% endif %}
 {%- endfor -%}
-{{ ":" }}
-{% filter indent(4, True) -%}
-    {% if not class.members %}{{ "..." }}{% endif %}
-    {% for function in class.functions.values() -%}
-        {% include "function.pyi.jinja2" with context -%}
-        {{ "\n" -}}
-    {% endfor -%}
-{% endfilter %}
+{{- ":" }}
+{% if not class.members %}
+    {{ "..." }}
+{%- else %}
+    {% filter indent(width=4) %}
+        {%- with object = class %}
+            {%- include "_members.pyi.jinja2" with context %}
+        {%- endwith %}
+    {% endfilter %}
+{% endif %}

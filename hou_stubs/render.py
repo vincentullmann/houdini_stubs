@@ -13,6 +13,13 @@ from griffe.dataclasses import Module
 
 TEMPLATES_PATH = Path(__file__).parent / "templates"
 
+################################################################################
+
+
+def file_exists(path) -> bool:
+    """Test whether a file exists or not."""
+    return os.path.exists(TEMPLATES_PATH / path)
+
 
 def render_template(template_path: str, **kwargs: Any) -> str:
     """Render Jinja2 template to a string.
@@ -28,6 +35,13 @@ def render_template(template_path: str, **kwargs: Any) -> str:
 
     environment = jinja2.Environment(
         loader=jinja2.FileSystemLoader(TEMPLATES_PATH),
+        trim_blocks=True,
+    )
+
+    kwargs.update(
+        {
+            "file_exists": file_exists,  # required for conditional "include" of static files
+        }
     )
 
     template = environment.get_template(template_path)

@@ -5,6 +5,10 @@ from __future__ import annotations
 import enum
 from typing import *
 
+{% for submodule in module.modules.values() -%}
+import {{ submodule.canonical_path }}
+{% endfor %}
+
 {% if module.name != "__init__" %}
 if TYPE_CHECKING:
     {% if module.parent -%}
@@ -15,10 +19,12 @@ if TYPE_CHECKING:
     import {{ module.canonical_path }}
 {%  endif %}
 
-{% for class in module.classes.values() -%}
-    {% include "class.pyi.jinja2" with context %}
-{% endfor %}
+{% with object = module %}
+    {%- include "_members.pyi.jinja2" with context %}
+{% endwith %}
 
-{% for function in module.functions.values() -%}
-    {% include "function.pyi.jinja2" with context %}
-{% endfor %}
+{% set static="static/" + module.canonical_path + ".pyi.jinja2" %}
+{{ "# STATIC PATH:"}} {{ static }}
+{% if file_exists(static) %}
+{% include static %}
+{% endif %}

@@ -1,0 +1,24 @@
+{# Template to render an Object Members -#}
+{% for member in object.members.values() %}
+{% if member.kind.value == "class" %}
+    {%- with class = member %}
+        {%- include "class.pyi.jinja2" with context %}
+    {% endwith %}
+{% endif %}
+{% if member.kind.value == "function" %}
+    {%- with function = member %}
+        {%- include "function.pyi.jinja2" with context %}
+    {% endwith %}
+{% endif %}
+{% if member.kind.value == "attribute" %}
+    {%- with attribute = member %}
+        {%- include "attribute.pyi.jinja2" with context %}
+    {% endwith %}
+{% endif %}
+{% if member.kind.value == "alias" %}
+    {%- with alias = member %}
+        {%- include "alias.pyi.jinja2" with context %}
+    {% endwith %}
+{% endif %}
+
+{% endfor %}
