@@ -1,13 +1,16 @@
 """{{module.docstring.value}}
 """
-
 from __future__ import annotations
-from typing import Union, Generator, Any, Optional
+
+import enum
+from typing import *
+
 {% if module.name != "__init__" %}
-import typing
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     {% if module.parent -%}
+    # fix some namespace issues for submodules
     import {{ module.parent.canonical_path }}
+    from  {{ module.parent.canonical_path }} import *
     {% endif -%}
     import {{ module.canonical_path }}
 {%  endif %}
