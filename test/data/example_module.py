@@ -54,8 +54,8 @@ def implicit_optional(name: str = None): ...
 def args_and_kwargs(self, args=(), kwargs={}) -> None: ...
 
 
-class EmptyClass(type, SomeClass):
-    """a class without any members."""
+# """a class without any members."""
+class EmptyClass(type, SomeClass): ...
 
 class logging:
     """Class to be exported as its own module."""

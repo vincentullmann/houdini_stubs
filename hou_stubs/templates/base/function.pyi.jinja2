@@ -1,16 +1,28 @@
+{# Decorators -#}
 {% for decorator in function.decorators %}
 {{ "@" }}{{ decorator.value }}
 {% endfor %}
+{# Name -#}
 {{ 'def ' -}}{{ function.name -}}{{ '(' -}}
+{# Parameters -#}
 {%- for parameter in function.parameters -%}
     {%- include "base/parameter.pyi.jinja2" with context -%}
     {% if not loop.last %}
         {{- ", " -}}
     {% endif %}
 {%- endfor -%}
-{{ ")" }}
-{%- if function.returns -%}
-{{ ' -> ' -}}{{ function.returns -}}{{ '' -}}
-{%- endif -%}
-{{ ': ...' -}}
+{{ ")" -}}
+{# Returns -#}
+{% if function.returns -%}
+    {{ ' -> ' }}{{ function.returns }}{{ '' -}}
+{% endif -%}
+{{ ':' }}
+{# Docstring -#}
+{% filter indent(width=4, first=True) -%}
+    {% if function.docstring -%}
+        {{ '"""' }}{{ function.docstring.value }}{{ '"""' }}
+    {% else -%}
+        {{ "..." -}}
+    {% endif %}
+{% endfilter %}
 

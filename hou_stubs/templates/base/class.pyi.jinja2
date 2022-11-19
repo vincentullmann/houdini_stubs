@@ -3,14 +3,20 @@
 {% if loop.first %}{{ "(" }}{% endif %}
 {{- base -}}
 {% if loop.last %}{{ ")" }}{% else %}{{ ", " }}{% endif %}
-{%- endfor -%}
-{{- ":" }}
-{% if not class.members %}
-    {{ "..." }}
-{%- else %}
-    {% filter indent(width=4) %}
-        {%- with object = class %}
-            {%- include "base/_members.pyi.jinja2" with context %}
-        {%- endwith %}
-    {% endfilter %}
-{% endif %}
+{% endfor -%}
+{{- ":\n" -}}
+
+{% filter indent(width=4, first=True) -%}
+    {% if not class.docstring and not class.members -%}{{ " ..." }}{% endif -%}
+    {# Docstring -#}
+    {% if class.docstring -%}
+        {{ '"""' -}}
+        {{ class.docstring.value -}}
+        {{ '"""\n' -}}
+    {% endif -%}
+
+    {# Members -#}
+    {% with object = class -%}
+        {% include "base/_members.pyi.jinja2" with context -%}
+    {% endwith -%}
+{% endfilter %}
