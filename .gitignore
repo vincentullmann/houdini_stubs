@@ -17,17 +17,10 @@ __pycache__/
 
 ################
 # Local Dev/Build Files
-node_modules
 venv
-_src
-dist
-.deploy/
-*.webp
-out.py[i]
 typings/*
 
 
 ################
 # Config Files
 .env
-tsconfig.tsbuildinfo
