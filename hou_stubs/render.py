@@ -48,18 +48,22 @@ def blackify(content: str) -> str:
         return content
 
 
-def render_module(module: Module, path: str) -> None:
+def get_module_filename(module: Module) -> str:
 
-    # build the output filepath
-    filename = module.canonical_path.replace(".", "/")
-    filename = os.path.join(path, filename)
+    path = module.canonical_path  # hou.hipFile.foo.bar
+    path = path.replace(".", "/")  # hou/hipFile/foo/bar
 
     if module.modules:
-        filename = f"{filename}/__init__.pyi"  # its a package
-        for submodule in module.modules.values():
-            render_module(submodule, path)
+        path = f"{path}/__init__.pyi"  # its a package ("hou/__init__.pyi")
     else:
-        filename = f"{filename}.pyi"  # its a regular module
+        path = f"{path}.pyi"  # its a regular module  ("hou/hipFile.pyi")
+
+    # rename the root module. eg.: "hou/hipFile" -> "hou-stubs/hipFile"
+    path = path.replace("/", "-stubs/", 1)
+    return path
+
+
+def render_module(module: Module, path: str) -> None:
 
     # Get the correct template
     template_path = f"static/{module.canonical_path}.pyi.jinja2"
@@ -70,7 +74,14 @@ def render_module(module: Module, path: str) -> None:
     content = render_template(template_path, module=module)
     content = blackify(content)
 
+    # build the output filepath
+    filename = get_module_filename(module)
+    filename = os.path.join(path, filename)
+
     # write
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     with open(filename, "w") as f:
         f.write(content)
+
+    for submodule in module.modules.values():
+        render_module(submodule, path)

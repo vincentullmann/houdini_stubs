@@ -6,7 +6,7 @@ import enum
 from typing import *
 
 {% for submodule in module.modules.values() -%}
-import {{ submodule.canonical_path }}
+from . import {{ submodule.name }}
 {% endfor %}
 
 {% if module.name != "__init__" %}
