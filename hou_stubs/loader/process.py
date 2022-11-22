@@ -11,6 +11,10 @@ from griffe.expressions import Expression, Name
 from hou_stubs.loader import process_utils
 from hou_stubs.parser import cpp, docstring
 
+WHITELIST = [
+    "__init__",
+]
+
 BLACKLIST = [
     "SwigPyIterator",
     "thisown",
@@ -31,6 +35,9 @@ def remove_prefix(text: str, prefix: str):
 def skip_member(obj: Object | Alias) -> bool:
 
     name = obj.name
+
+    if name in WHITELIST:
+        return False
 
     # magic methods
     if name.startswith("__") and name.endswith("__"):
@@ -183,8 +190,7 @@ def add_enum_values(cls: Class) -> None:
     docstring = cls.docstring.value if cls.docstring else ""
     values = process_utils.enum_values_from_docstring(docstring)
     for name in values:
-        # TODO: init with name once `__init__` methods are supported`
-        cls.members[name] = Attribute(name=name, value=f"hou.EnumValue")
+        cls.members[name] = Attribute(name=name, value=f"hou.EnumValue('{name}')")
 
 
 def process_class(cls: Class) -> None:
