@@ -8,6 +8,7 @@ from griffe.dataclasses import Alias, Attribute, Class, Decorator, Function, Mod
 from griffe.expressions import Expression, Name
 
 # IMPORT LOCAL LIBRARIES
+from hou_stubs.loader import process_utils
 from hou_stubs.parser import cpp, docstring
 
 BLACKLIST = [
@@ -178,8 +179,17 @@ def process_function(func: Function):
             func.decorators.append(Decorator(decorator, lineno=0, endlineno=0))
 
 
+def add_enum_values(cls: Class) -> None:
+    docstring = cls.docstring.value if cls.docstring else ""
+    values = process_utils.enum_values_from_docstring(docstring)
+    for name in values:
+        # TODO: init with name once `__init__` methods are supported`
+        cls.members[name] = Attribute(name=name, value=f"hou.EnumValue")
+
+
 def process_class(cls: Class) -> None:
     cls.bases = [process_type(base) for base in cls.bases]
+    add_enum_values(cls)
 
 
 def process_module(module: Module) -> None:
