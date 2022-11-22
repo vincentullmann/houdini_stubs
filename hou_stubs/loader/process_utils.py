@@ -26,6 +26,7 @@ def enum_values_from_docstring(docstring: str) -> list[str]:
 
     docstring = textwrap.dedent(docstring)  # align all top level entries
     values_block = docstring.split("VALUES", 1)[-1]
+    values_block = values_block + "\n"  # ensure we always have a trailing newline
 
     # extract only indented words
     values = re.findall(r"(?:\s{4})(\w+)\n", values_block)
