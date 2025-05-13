@@ -1,7 +1,11 @@
-
 # Houdini Stub File Generator
 
 Type annotation builder for [SideFX Houdini](https://www.sidefx.com/) `hou`-python Module
+
+
+## ⚠️ This project is no longer maintained.
+
+> We recommend using 👉 [**LumaPictures/cg-stubs**](https://github.com/LumaPictures/cg-stubs) as a better alternative
 
 
 ## Usage:
